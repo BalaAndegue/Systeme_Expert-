@@ -6,6 +6,7 @@ from app.agents.weather import WeatherAgent
 from app.agents.crop import CropAgent
 from app.agents.health import HealthAgent
 from app.agents.economic import EconomicAgent
+from app.agents.resources import ResourcesAgent
 from app.core.orchestrator import AgentOrchestrator
 
 def run_cli(query, region):
@@ -18,7 +19,8 @@ def run_cli(query, region):
         WeatherAgent(),
         CropAgent(),
         HealthAgent(),
-        EconomicAgent()
+        EconomicAgent(),
+        ResourcesAgent()
     ]
     orchestrator = AgentOrchestrator(agents)
     orchestrator.update_context('region', region)
