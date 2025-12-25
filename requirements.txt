@@ -5,3 +5,4 @@ flask[async]>=3.0.0
 pydantic>=2.5.2
 pytest>=7.4.3
 flasgger>=0.9.5
+gunicorn>=21.2.0
