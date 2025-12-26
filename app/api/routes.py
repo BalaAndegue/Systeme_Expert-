@@ -41,7 +41,7 @@ async def handle_query():
               example: "Quand planter le maïs dans le Centre ?"
             region:
               type: string
-              description: La région concernée (ex: Centre, Nord).
+              description: "La région concernée (ex: Centre, Nord)."
               default: Centre
     responses:
       200:
