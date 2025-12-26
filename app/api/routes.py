@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+import traceback
 from app.core.orchestrator import AgentOrchestrator
 from app.agents.weather import WeatherAgent
 from app.agents.crop import CropAgent
@@ -92,6 +93,7 @@ async def handle_query():
             "final_response": final_response
         })
     except Exception as e:
+        traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
 @api_bp.route('/agents', methods=['GET'])

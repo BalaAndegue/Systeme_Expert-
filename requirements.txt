@@ -6,3 +6,4 @@ pydantic>=2.5.2
 pytest>=7.4.3
 flasgger>=0.9.5
 gunicorn>=21.2.0
+uvicorn>=0.25.0
