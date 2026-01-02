@@ -6,6 +6,7 @@ from app.agents.crop import CropAgent
 from app.agents.health import HealthAgent
 from app.agents.economic import EconomicAgent
 from app.agents.resources import ResourcesAgent
+from app.agents.fertilizer import FertilizerAgent
 import asyncio
 
 api_bp = Blueprint('api', __name__)
@@ -16,7 +17,8 @@ agents = [
     CropAgent(),
     HealthAgent(),
     EconomicAgent(),
-    ResourcesAgent()
+    ResourcesAgent(),
+    FertilizerAgent()
 ]
 orchestrator = AgentOrchestrator(agents)
 

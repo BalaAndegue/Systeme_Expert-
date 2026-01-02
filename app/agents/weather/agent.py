@@ -12,13 +12,18 @@ class WeatherAgent(BaseAgent):
         )
 
     async def process(self, query: str, context: Dict[str, Any]) -> str:
-        # Récupération de la région du contexte ou extraction simple
-        region_name = context.get('region', 'Centre') # Défaut Centre
+        # Récupération de la région du contexte
+        region_name = context.get('region', 'Centre')
         region_info = get_region_by_name(region_name)
         
+        # Récupération météo réelle
+        from .tools import fetch_weather_data, format_weather_data
+        real_weather = fetch_weather_data(region_name)
+        weather_desc = format_weather_data(real_weather)
+
         region_desc = "Région inconnue"
         if region_info:
-            region_desc = f"{region_info.name} (Capitale: {region_info.capital}). Climat: {region_info.climate_description}"
+            region_desc = f"{region_info.name} (Capitale: {region_info.capital}). Climat: {region_info.climate_description}. Météo actuelle: {weather_desc}"
 
         system_prompt = get_system_prompt(region_desc)
         
