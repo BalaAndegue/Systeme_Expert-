@@ -16,14 +16,34 @@ class WeatherAgent(BaseAgent):
         region_name = context.get('region', 'Centre')
         region_info = get_region_by_name(region_name)
         
-        # Récupération météo réelle
-        from .tools import fetch_weather_data, format_weather_data
+        # Récupération météo réelle et outils
+        from .tools import (
+            fetch_weather_data, 
+            format_weather_data, 
+            get_weather_forecast, 
+            get_irrigation_advice,
+            get_climate_alerts,
+            analyze_rainfall_patterns
+        )
+        
         real_weather = fetch_weather_data(region_name)
         weather_desc = format_weather_data(real_weather)
+        forecast = get_weather_forecast(region_name)
+        irrigation = get_irrigation_advice(region_name)
+        alerts = get_climate_alerts(region_name)
+        patterns = analyze_rainfall_patterns(region_name)
 
         region_desc = "Région inconnue"
         if region_info:
-            region_desc = f"{region_info.name} (Capitale: {region_info.capital}). Climat: {region_info.climate_description}. Météo actuelle: {weather_desc}"
+            region_desc = (
+                f"{region_info.name} (Capitale: {region_info.capital}).\n"
+                f"Climat: {region_info.climate_description}.\n"
+                f"Conditions actuelles: {weather_desc}\n"
+                f"Prévisions:\n{forecast}\n"
+                f"Conseils Irrigation: {irrigation}\n"
+                f"Alertes: {alerts}\n"
+                f"Analyse Pluie: {patterns}"
+            )
 
         system_prompt = get_system_prompt(region_desc)
         
