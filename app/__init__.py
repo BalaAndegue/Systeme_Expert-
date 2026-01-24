@@ -1,9 +1,13 @@
 from flask import Flask
 from config import get_config
+from flask_cors import CORS
 
 def create_app(config_name='dev'):
     app = Flask(__name__)
     app.config.from_object(get_config())
+    
+    # Autoriser CORS pour le front-end Vercel
+    CORS(app, origins=["https://smart-agro-three.vercel.app"], supports_credentials=True)
     
     from flasgger import Swagger
     Swagger(app, template={
