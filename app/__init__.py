@@ -6,8 +6,8 @@ def create_app(config_name='dev'):
     app = Flask(__name__)
     app.config.from_object(get_config())
     
-    # Autoriser CORS pour le front-end Vercel
-    CORS(app, origins=["https://smart-agro-three.vercel.app"], supports_credentials=True)
+    # Autoriser CORS pour toutes les origines
+    CORS(app, origins="*", supports_credentials=True)
     
     from flasgger import Swagger
     Swagger(app, template={
@@ -15,7 +15,11 @@ def create_app(config_name='dev'):
             "title": "Agriculture Cameroun API",
             "description": "API du Système Expert Agricole pour le Cameroun",
             "version": "1.0.0"
-        }
+        },
+        "servers": [
+            {"url": "http://localhost:5000", "description": "Serveur local"},
+            {"url": "https://agriculture-cameroun-simple.onrender.com", "description": "Production Render"}
+        ]
     })
 
     # Initialisation des routes
