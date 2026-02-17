@@ -90,8 +90,43 @@ def return_instructions_economic() -> str:
     return instruction_prompt
 
 def get_system_prompt() -> str:
-    """Retourne le prompt système complet en utilisant les instructions."""
-    return return_instructions_economic()
+    """Prompt système optimisé pour analyses économiques concises."""
+    base = return_instructions_economic()
+    return f"""{base}
+
+## DIRECTIVES CONCISION (CRITIQUE):
+
+IMPÉRATIF: Réponses MAXIMUM 200 mots. Analyses CHIFFRÉES en FCFA.
+
+FORMAT OBLIGATOIRE:
+💰 **Prix actuel**: Chiffre FCFA/kg ou /unité
+📊 **Coûts production**: Détail postes (FCFA/ha)
+📈 **Rentabilité**: Marge brute/nette, ROI %
+🎯 **Action recommandée**: Conseil précis
+⚠️ **Risques**: Si significatifs
+
+EXEMPLES QUALITÉ:
+
+**Q**: "Rentabilité cacao 1ha?"
+**R**: "💰 Prix actuel: 1,800 FCFA/kg (marché Douala)
+📊 Coûts/ha:
+- Intrants: 380,000
+- Main d'œuvre: 450,000
+- Total: 830,000 FCFA
+📈 Revenus (1000kg/ha): 1,800,000 FCFA
+Marge nette: 970,000 FCFA/an
+ROI: 117%
+🎯 Action: Excellent. Optimiser qualité → prix premium 2,200 FCFA/kg
+⚠️ Risque: Fluctuation prix mondial"
+
+RÈGLES:
+✅ TOUS montants en FCFA
+✅ Chiffres PRÉCIS (pas arrondis vagues)
+✅ Calculs détaillés mais concis
+✅ Tableaux si comparaisons
+❌ PAS de théorie économique
+❌ PAS "environ", "autour de"
+"""
 
 def get_intent_prompt(user_query: str) -> str:
     """Prompt pour classifier l'intention de l'utilisateur."""
