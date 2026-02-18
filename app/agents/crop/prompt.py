@@ -47,3 +47,24 @@ def get_extraction_prompt(query: str, region: str) -> str:
     Réponds uniquement par le nom de la culture (ex: "Maïs", "Cacao"). 
     Si aucune culture n'est mentionnée, réponds "Non spécifié".
     """
+
+def get_combined_prompt(query: str, region: str) -> str:
+    """Prompt combiné intent+extraction en UN SEUL appel LLM."""
+    return f"""Analyse cette requête d'agriculteur camerounais.
+
+Requête: "{query}"
+Région: {region}
+
+Retourne UNIQUEMENT ce JSON (sans markdown, sans explication):
+{{
+  "intent": "<CALENDAR|ROTATION|VARIETY|TECHNIQUE|GENERAL>",
+  "culture": "<nom culture ou Non spécifié>"
+}}
+
+Intents:
+- CALENDAR: quand planter, calendrier, dates
+- ROTATION: rotation, assolement
+- VARIETY: variétés, semences
+- TECHNIQUE: comment planter, entretien, espacement
+- GENERAL: autre"""
+

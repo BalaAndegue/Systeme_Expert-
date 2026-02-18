@@ -160,3 +160,26 @@ def get_extraction_prompt(user_query: str) -> str:
         "region": "..."
     }}
     """
+
+def get_combined_prompt(user_query: str) -> str:
+    """Prompt combiné intent+extraction en UN SEUL appel LLM."""
+    return f"""Analyse cette requête économique d'agriculteur camerounais.
+
+Requête: "{user_query}"
+
+Retourne UNIQUEMENT ce JSON (sans markdown, sans explication):
+{{
+  "intent": "<PRICES|PROFITABILITY|TRENDS|STRATEGY|OPPORTUNITIES|COST_CALCULATION|GENERAL>",
+  "culture": "<nom culture ou Non spécifié>",
+  "region": "<nom région/marché ou Non spécifié>"
+}}
+
+Intents:
+- PRICES: prix actuels du marché
+- PROFITABILITY: rentabilité, coûts
+- TRENDS: tendances du marché
+- STRATEGY: stratégies de vente
+- OPPORTUNITIES: opportunités de marché
+- COST_CALCULATION: calcul précis des coûts
+- GENERAL: autre question économique"""
+

@@ -164,3 +164,25 @@ def get_intent_prompt(query: str) -> str:
     
     Réponds UNIQUEMENT par le mot clé.
     """
+
+def get_combined_prompt(query: str) -> str:
+    """Prompt combiné intent+culture en UN SEUL appel LLM."""
+    return f"""Analyse cette requête sur les ressources agricoles camerounaises.
+
+Requête: "{query}"
+
+Retourne UNIQUEMENT ce JSON (sans markdown, sans explication):
+{{
+  "intent": "<SOIL_ANALYSIS|FERTILIZER|IRRIGATION|SUITABILITY|NUTRIENTS|AMENDMENTS|GENERAL>",
+  "culture": "<nom culture ou Non spécifié>"
+}}
+
+Intents:
+- SOIL_ANALYSIS: analyse sol, besoins sol
+- FERTILIZER: engrais, fertilisation
+- IRRIGATION: eau, arrosage, irrigation
+- SUITABILITY: aptitude terrain
+- NUTRIENTS: besoins nutritifs
+- AMENDMENTS: amendements, chaux, correction sol
+- GENERAL: autre"""
+

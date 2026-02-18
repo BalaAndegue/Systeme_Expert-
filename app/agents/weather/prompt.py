@@ -80,3 +80,23 @@ Exemples:
 "Météo pour cacao?" → {{"culture": "cacao", "période": "aujourd'hui"}}
 "Pluies prochaines semaines?" → {{"culture": "Non spécifié", "période": "semaine"}}
 """
+
+def get_combined_prompt(query: str) -> str:
+    """Prompt combiné intent+culture en UN SEUL appel LLM."""
+    return f"""Analyse cette requête météo agricole camerounaise.
+
+Requête: "{query}"
+
+Retourne UNIQUEMENT ce JSON (sans markdown, sans explication):
+{{
+  "intent": "<CURRENT|FORECAST|IRRIGATION|PLANTING|ALERT|GENERAL>",
+  "culture": "<nom culture ou Non spécifié>"
+}}
+
+Intents:
+- CURRENT: conditions actuelles/maintenant
+- FORECAST: prévisions futures
+- IRRIGATION: arrosage/besoins eau
+- PLANTING: conditions plantation
+- ALERT: risques/dangers
+- GENERAL: autre"""

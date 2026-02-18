@@ -1,12 +1,14 @@
 import asyncio
 import os
 import sys
+import pytest
 
 # Add project root to path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from app.agents.health import HealthAgent
 
+@pytest.mark.asyncio
 async def test_health_agent():
     print("--- Test Health Agent ---")
     agent = HealthAgent()

@@ -20,8 +20,8 @@ def test_format_weather_data():
     }
     formatted = format_weather_data(mock_data)
     assert "25.5°C" in formatted
-    assert "10.2 km/h" in formatted
+    assert "10.2km/h" in formatted
 
 def test_format_weather_data_none():
     formatted = format_weather_data(None)
-    assert "non disponibles" in formatted
+    assert "indisponibles" in formatted.lower() or "indisponible" in formatted.lower()

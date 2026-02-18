@@ -202,3 +202,24 @@ def get_extraction_prompt(user_query: str) -> str:
         "symptômes": "..."
     }}
     """
+
+def get_combined_prompt(user_query: str) -> str:
+    """Prompt combiné intent+extraction en UN SEUL appel LLM."""
+    return f"""Analyse cette requête phytosanitaire d'agriculteur camerounais.
+
+Requête: "{user_query}"
+
+Retourne UNIQUEMENT ce JSON (sans markdown, sans explication):
+{{
+  "intent": "<DIAGNOSIS|PEST_ID|TREATMENT|PREVENTION|GENERAL>",
+  "culture": "<nom culture ou Non spécifié>",
+  "symptomes": "<description symptômes ou Non spécifié>"
+}}
+
+Intents:
+- DIAGNOSIS: symptômes, maladie à identifier
+- PEST_ID: insecte ou ravageur à identifier
+- TREATMENT: demande de traitement spécifique
+- PREVENTION: stratégies préventives
+- GENERAL: autre question santé plantes"""
+

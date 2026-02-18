@@ -1,7 +1,7 @@
 from app.agents.base_agent import BaseAgent
 from typing import Dict, Any
 import json
-from .prompt import get_system_prompt, get_intent_prompt, get_extraction_prompt, return_instructions_economic
+from .prompt import get_system_prompt, get_combined_prompt, get_intent_prompt, get_extraction_prompt, return_instructions_economic
 from .tools import (
     get_market_prices,
     analyze_profitability,
@@ -22,39 +22,33 @@ class EconomicAgent(BaseAgent):
         # 1. Récupération du contexte
         region_name = context.get('region', 'Cameroun')
         
-        # 2. Détection de l'intention
-        intent_prompt = get_intent_prompt(query)
-        intent = await self.llm_service.generate_response(intent_prompt)
-        intent = intent.strip().upper()
-        
-        # Nettoyage de l'intention
-        valid_intents = ["PRICES", "PROFITABILITY", "TRENDS", "STRATEGY", "OPPORTUNITIES", "COST_CALCULATION", "GENERAL"]
-        found_intent = "GENERAL"
-        for valid in valid_intents:
-            if valid in intent:
-                found_intent = valid
-                break
-        intent = found_intent
-        
-        print(f"DEBUG: Intent detected by EconomicAgent: {intent}")
-
-        # 3. Extraction des entités (culture, région)
-        extract_prompt = get_extraction_prompt(query)
-        extraction_json = await self.llm_service.generate_response(extract_prompt)
+        # 2. Intent + Extraction en UN SEUL appel LLM (optimisation latence)
+        combined_prompt = get_combined_prompt(query)
+        combined_json = await self.llm_service.generate_response(combined_prompt)
         
         try:
-            cleaned_json = extraction_json.replace("```json", "").replace("```", "").strip()
-            entities = json.loads(cleaned_json)
+            cleaned = combined_json.replace("```json", "").replace("```", "").strip()
+            parsed = json.loads(cleaned)
+            intent = parsed.get("intent", "GENERAL").strip().upper()
+            culture = parsed.get("culture", "Non spécifié").strip()
+            region_entity = parsed.get("region", "Non spécifié").strip()
         except Exception as e:
-            print(f"Warning: Failed to parse extraction JSON: {e}")
-            entities = {"culture": "Non spécifié", "region": "Non spécifié"}
-            
-        culture = entities.get("culture", "Non spécifié")
-        region_entity = entities.get("region", region_name)
+            print(f"Warning: Failed to parse combined JSON for EconomicAgent: {e}")
+            intent = "GENERAL"
+            culture = "Non spécifié"
+            region_entity = "Non spécifié"
+        
+        # Validation de l'intent
+        valid_intents = ["PRICES", "PROFITABILITY", "TRENDS", "STRATEGY", "OPPORTUNITIES", "COST_CALCULATION", "GENERAL"]
+        if intent not in valid_intents:
+            intent = "GENERAL"
+        
         if region_entity == "Non spécifié":
             region_entity = region_name
         
-        # 4. Dispatching vers les outils
+        print(f"DEBUG: Intent detected by EconomicAgent: {intent}")
+
+        # 3. Dispatching vers les outils
         if intent == "PRICES":
             result = await get_market_prices(self.llm_service, culture, region_entity)
             return f"Analyse des prix pour {culture} ({region_entity}) :\n\n{result.get('prices_analysis')}"
@@ -79,7 +73,7 @@ class EconomicAgent(BaseAgent):
             result = await analyze_market_opportunities(self.llm_service, region_entity)
             return f"Opportunités de marché à {region_entity} :\n\n{result.get('opportunities')}"
             
-        else: # GENERAL
+        else:  # GENERAL
             system_prompt = get_system_prompt()
             full_context_prompt = f"{system_prompt}\n\nContexte actuel: Région={region_entity}, Culture={culture}"
             return await self.llm_service.generate_response(query, full_context_prompt)
