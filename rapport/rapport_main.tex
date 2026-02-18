@@ -1,0 +1,151 @@
+% ============================================================
+%  RAPPORT TECHNIQUE — SYSTÈME EXPERT AGRICOLE CAMEROUN
+%  Projet IoT + Machine Learning pour le Suivi des Cultures
+% ============================================================
+\documentclass[12pt,a4paper]{report}
+
+% --- Encodage & Langue ---
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+
+% --- Mise en page ---
+\usepackage[top=2.5cm,bottom=2.5cm,left=3cm,right=2.5cm]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+
+% --- Typographie ---
+\usepackage{lmodern}
+\usepackage{microtype}
+
+% --- Couleurs & Graphiques ---
+\usepackage[dvipsnames,table]{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, fit, backgrounds, shadows, decorations.pathreplacing}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage{graphicx}
+
+% --- Tableaux ---
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{colortbl}
+
+% --- Code source ---
+\usepackage{listings}
+\usepackage{minted}
+
+% --- Mathématiques ---
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+% --- Liens & PDF ---
+\usepackage[colorlinks=true,linkcolor=NavyBlue,citecolor=ForestGreen,urlcolor=RoyalBlue]{hyperref}
+\usepackage{bookmark}
+
+% --- En-têtes & pieds de page ---
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\textit{Système Expert Agricole Cameroun}}
+\fancyhead[R]{\small\textit{\leftmark}}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% --- Boîtes colorées ---
+\usepackage{tcolorbox}
+\tcbuselibrary{skins,breakable,listings}
+
+% --- Symboles ---
+\usepackage{fontawesome5}
+\usepackage{pifont}
+
+% --- Algorithmes ---
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+% --- Numérotation ---
+\usepackage{enumitem}
+
+% --- Définitions de couleurs thématiques ---
+\definecolor{AgriGreen}{RGB}{34,139,34}
+\definecolor{AgriBlue}{RGB}{30,100,180}
+\definecolor{AgriOrange}{RGB}{220,100,20}
+\definecolor{AgriRed}{RGB}{180,30,30}
+\definecolor{AgriGray}{RGB}{100,100,100}
+\definecolor{LightGreen}{RGB}{220,255,220}
+\definecolor{LightBlue}{RGB}{220,235,255}
+\definecolor{LightOrange}{RGB}{255,240,220}
+\definecolor{CodeBg}{RGB}{248,248,248}
+
+% --- Style listings Python ---
+\lstdefinestyle{pythonstyle}{
+  language=Python,
+  backgroundcolor=\color{CodeBg},
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{AgriBlue}\bfseries,
+  stringstyle=\color{AgriGreen},
+  commentstyle=\color{AgriGray}\itshape,
+  numberstyle=\tiny\color{AgriGray},
+  numbers=left,
+  numbersep=8pt,
+  frame=single,
+  framerule=0.5pt,
+  rulecolor=\color{AgriBlue!40},
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  captionpos=b,
+}
+\lstset{style=pythonstyle}
+
+% --- Boîtes info ---
+\newtcolorbox{infobox}[1][]{
+  colback=LightBlue,colframe=AgriBlue,
+  fonttitle=\bfseries,title=#1,
+  breakable
+}
+\newtcolorbox{warningbox}[1][]{
+  colback=LightOrange,colframe=AgriOrange,
+  fonttitle=\bfseries,title=#1,
+  breakable
+}
+\newtcolorbox{successbox}[1][]{
+  colback=LightGreen,colframe=AgriGreen,
+  fonttitle=\bfseries,title=#1,
+  breakable
+}
+
+% ============================================================
+\begin{document}
+
+% --- Page de titre ---
+\input{titre}
+
+% --- Résumé ---
+\input{resume}
+
+% --- Table des matières ---
+\tableofcontents
+\listoffigures
+\listoftables
+\newpage
+
+% --- Chapitres ---
+\input{chap1_introduction}
+\input{chap2_contexte}
+\input{chap3_architecture}
+\input{chap4_agents}
+\input{chap5_iot_ml}
+\input{chap6_implementation}
+\input{chap7_resultats}
+\input{chap8_conclusion}
+
+% --- Bibliographie ---
+\bibliographystyle{plain}
+\bibliography{references}
+
+\end{document}

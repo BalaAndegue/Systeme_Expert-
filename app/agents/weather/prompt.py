@@ -62,6 +62,7 @@ Catégories:
 - IRRIGATION: Arrosage/besoins eau
 - PLANTING: Conditions plantation
 - ALERT: Risques/dangers
+- MONITORING: Suivi sur période (7 jours, 1 mois, semaine, calendrier suivi)
 - GENERAL: Autre
 
 Réponds UNIQUEMENT le mot-clé (ex: CURRENT)"""
@@ -89,8 +90,9 @@ Requête: "{query}"
 
 Retourne UNIQUEMENT ce JSON (sans markdown, sans explication):
 {{
-  "intent": "<CURRENT|FORECAST|IRRIGATION|PLANTING|ALERT|GENERAL>",
-  "culture": "<nom culture ou Non spécifié>"
+  "intent": "<CURRENT|FORECAST|IRRIGATION|PLANTING|ALERT|MONITORING|GENERAL>",
+  "culture": "<nom culture ou Non spécifié>",
+  "period_days": <7 ou 30 selon la durée demandée, défaut 7>
 }}
 
 Intents:
@@ -99,4 +101,11 @@ Intents:
 - IRRIGATION: arrosage/besoins eau
 - PLANTING: conditions plantation
 - ALERT: risques/dangers
-- GENERAL: autre"""
+- MONITORING: suivi sur période (7 jours, 1 mois, semaine, calendrier, planning)
+- GENERAL: autre
+
+Exemples:
+- "météo cette semaine" → FORECAST, period_days: 7
+- "plan de suivi maïs 1 mois" → MONITORING, period_days: 30
+- "suivi cacao 7 jours" → MONITORING, period_days: 7
+- "dois-je irriguer ?" → IRRIGATION, period_days: 7"""

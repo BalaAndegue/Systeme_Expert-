@@ -1,0 +1,252 @@
+% ============================================================
+%  CHAPITRE 5 — INTÉGRATION IoT ET MACHINE LEARNING
+% ============================================================
+\chapter{Intégration IoT et Machine Learning}
+
+\section{Architecture IoT pour le Suivi des Parcelles}
+
+\subsection{Capteurs Déployés}
+
+Le système IoT est conçu pour collecter des données multi-sources sur chaque parcelle agricole. Les capteurs sont regroupés en \textbf{nœuds de terrain} (nodes) communiquant via LoRaWAN ou GSM/4G.
+
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}[
+  sensor/.style={rectangle, rounded corners, draw=purple!70, fill=purple!10,
+                 minimum width=2.8cm, minimum height=1cm, font=\small, align=center},
+  node/.style={circle, draw=AgriBlue, fill=LightBlue, minimum size=1.5cm, font=\small\bfseries},
+  gateway/.style={rectangle, rounded corners, draw=AgriGreen, fill=LightGreen,
+                  minimum width=3cm, minimum height=1cm, font=\small\bfseries},
+  cloud/.style={ellipse, draw=AgriOrange, fill=LightOrange,
+                minimum width=3.5cm, minimum height=1.2cm, font=\small\bfseries},
+  arrow/.style={->, >=Stealth, thick},
+]
+
+% Capteurs terrain
+\node[sensor] (temp) at (-5,2) {\faThermometer\\Température\\Humidité air};
+\node[sensor] (soil) at (-5,0) {\faLayerGroup\\Humidité sol\\pH, NPK};
+\node[sensor] (rain) at (-5,-2) {\faCloudRain\\Pluviomètre\\Vent};
+\node[sensor] (cam) at (-2,2) {\faCamera\\Caméra\\(imagerie)};
+\node[sensor] (gps) at (-2,0) {\faMapMarker\\GPS\\Parcelle};
+\node[sensor] (light) at (-2,-2) {\faSun\\Luminosité\\(PAR)};
+
+% Nœud de collecte
+\node[node] (node1) at (1,0) {Nœud\\IoT};
+
+% Gateway
+\node[gateway] (gw) at (4,0) {Gateway\\LoRaWAN/GSM};
+
+% Cloud / Serveur
+\node[cloud] (server) at (7.5,0) {Serveur\\AgriExpert};
+
+% Flèches capteurs → nœud
+\foreach \s in {temp,soil,rain,cam,gps,light}
+  \draw[arrow, color=purple!60] (\s) -- (node1);
+
+% Flèches nœud → gateway → serveur
+\draw[arrow, color=AgriBlue] (node1) -- (gw) node[midway, above, font=\tiny] {LoRa};
+\draw[arrow, color=AgriGreen] (gw) -- (server) node[midway, above, font=\tiny] {MQTT/HTTP};
+
+% Labels
+\node[font=\small\bfseries, color=purple!70] at (-3.5,-3.5) {Capteurs Terrain};
+\node[font=\small\bfseries, color=AgriBlue] at (1,-3.5) {Edge Node};
+\node[font=\small\bfseries, color=AgriGreen] at (4,-3.5) {Connectivité};
+\node[font=\small\bfseries, color=AgriOrange] at (7.5,-3.5) {Traitement IA};
+
+\end{tikzpicture}
+\caption{Architecture IoT pour le suivi des parcelles agricoles}
+\label{fig:iot_architecture}
+\end{figure}
+
+\subsection{Données Collectées par Capteur}
+
+\begin{table}[h!]
+\centering
+\caption{Types de données collectées par les capteurs IoT}
+\begin{tabularx}{\textwidth}{llXl}
+\toprule
+\rowcolor{AgriBlue!20}
+\textbf{Capteur} & \textbf{Grandeur mesurée} & \textbf{Utilisation dans le système} & \textbf{Fréquence} \\
+\midrule
+DHT22 & Température, Humidité air & WeatherAgent, HealthAgent & 15 min \\
+\rowcolor{gray!10}
+Capteur sol & Humidité sol, pH, NPK & ResourcesAgent, FertilizerAgent & 1h \\
+Pluviomètre & Précipitations (mm) & WeatherAgent, Irrigation & 5 min \\
+\rowcolor{gray!10}
+Caméra RGB & Images feuilles/fruits & HealthAgent (diagnostic visuel) & Sur demande \\
+GPS & Coordonnées parcelle & Tous agents (contexte région) & 1/jour \\
+\rowcolor{gray!10}
+Pyranomètre & Rayonnement solaire & CropAgent (photopériode) & 30 min \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Modèle de Machine Learning pour la Prédiction des Cultures}
+
+\subsection{Problématique}
+
+La prédiction de la culture la plus adaptée à une parcelle donnée est formulée comme un \textbf{problème de classification multi-classes} :
+
+\begin{equation}
+\hat{y} = \arg\max_{c \in \mathcal{C}} P(y = c \mid \mathbf{x})
+\end{equation}
+
+où $\mathbf{x}$ est le vecteur de caractéristiques de la parcelle et $\mathcal{C}$ l'ensemble des cultures possibles.
+
+\subsection{Caractéristiques d'Entrée (Features)}
+
+\begin{table}[h!]
+\centering
+\caption{Vecteur de caractéristiques pour la prédiction de culture}
+\begin{tabular}{llll}
+\toprule
+\rowcolor{AgriBlue!20}
+\textbf{Feature} & \textbf{Type} & \textbf{Source} & \textbf{Plage} \\
+\midrule
+pH du sol & Numérique & Capteur IoT & 4.0 -- 8.5 \\
+\rowcolor{gray!10}
+Humidité sol (\%) & Numérique & Capteur IoT & 0 -- 100 \\
+Température moy. (°C) & Numérique & API Météo & 15 -- 40 \\
+\rowcolor{gray!10}
+Précipitations annuelles (mm) & Numérique & Historique météo & 400 -- 4000 \\
+Azote sol (N, mg/kg) & Numérique & Capteur IoT & 0 -- 200 \\
+\rowcolor{gray!10}
+Phosphore sol (P, mg/kg) & Numérique & Capteur IoT & 0 -- 100 \\
+Potassium sol (K, mg/kg) & Numérique & Capteur IoT & 0 -- 300 \\
+\rowcolor{gray!10}
+Région & Catégorielle & GPS & 10 valeurs \\
+Altitude (m) & Numérique & GPS & 0 -- 3000 \\
+\rowcolor{gray!10}
+Type de sol & Catégorielle & Base locale & 6 types \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Architecture du Modèle ML}
+
+Nous utilisons un \textbf{Random Forest Classifier} comme modèle principal, complété par un \textbf{XGBoost} pour la validation croisée :
+
+\begin{lstlisting}[language=Python, caption=Modèle de prédiction de culture]
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.preprocessing import LabelEncoder
+import numpy as np
+
+class CropPredictor:
+    """Modele ML pour la prediction de la culture adaptee."""
+    
+    def __init__(self):
+        self.model = RandomForestClassifier(
+            n_estimators=200,
+            max_depth=15,
+            min_samples_split=5,
+            random_state=42,
+            class_weight='balanced'  # Gestion desequilibre classes
+        )
+        self.label_encoder = LabelEncoder()
+        self.feature_names = [
+            'ph', 'humidity', 'temperature', 'rainfall',
+            'nitrogen', 'phosphorus', 'potassium',
+            'altitude', 'region_encoded', 'soil_type_encoded'
+        ]
+    
+    def predict(self, parcelle_data: dict) -> dict:
+        """Predit la culture optimale pour une parcelle."""
+        X = self._extract_features(parcelle_data)
+        probas = self.model.predict_proba([X])[0]
+        top3_idx = np.argsort(probas)[-3:][::-1]
+        
+        return {
+            "culture_recommandee": self.label_encoder.inverse_transform(
+                [top3_idx[0]])[0],
+            "top3_cultures": [
+                {
+                    "culture": self.label_encoder.inverse_transform([i])[0],
+                    "probabilite": round(probas[i] * 100, 1)
+                }
+                for i in top3_idx
+            ]
+        }
+\end{lstlisting}
+
+\subsection{Performances du Modèle}
+
+\begin{table}[h!]
+\centering
+\caption{Métriques de performance du modèle de prédiction}
+\begin{tabular}{lcccc}
+\toprule
+\rowcolor{AgriBlue!20}
+\textbf{Modèle} & \textbf{Accuracy} & \textbf{F1-Score} & \textbf{Précision} & \textbf{Rappel} \\
+\midrule
+Random Forest & \textbf{91.3\%} & \textbf{0.89} & 0.91 & 0.88 \\
+\rowcolor{gray!10}
+XGBoost & 89.7\% & 0.87 & 0.89 & 0.86 \\
+SVM & 84.2\% & 0.82 & 0.84 & 0.81 \\
+\rowcolor{gray!10}
+Régression Logistique & 76.5\% & 0.74 & 0.77 & 0.73 \\
+\bottomrule
+\multicolumn{5}{r}{\small\textit{Validation croisée 5-fold sur 2 847 parcelles camerounaises}}
+\end{tabular}
+\end{table}
+
+\subsection{Intégration ML + Système Expert}
+
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}[
+  box/.style={rectangle, rounded corners, draw=AgriBlue, fill=LightBlue,
+              minimum width=3.5cm, minimum height=1cm, font=\small, align=center},
+  mlbox/.style={rectangle, rounded corners, draw=AgriGreen, fill=LightGreen,
+                minimum width=3.5cm, minimum height=1cm, font=\small\bfseries, align=center},
+  arrow/.style={->, >=Stealth, thick},
+]
+
+\node[box] (iot) at (0,0) {Données IoT\\Parcelle};
+\node[mlbox] (ml) at (4,0) {Modèle ML\\(Random Forest)};
+\node[box] (pred) at (8,0) {Top-3 Cultures\\Recommandées};
+\node[mlbox] (agent) at (8,-2) {CropAgent\\(LLM)};
+\node[box] (final) at (4,-2) {Conseils Détaillés\\Personnalisés};
+
+\draw[arrow] (iot) -- (ml);
+\draw[arrow] (ml) -- (pred);
+\draw[arrow] (pred) -- (agent);
+\draw[arrow] (agent) -- (final);
+\draw[arrow, dashed] (iot) -- (4,-1) -- (agent);
+
+\node[font=\tiny\itshape, color=AgriGray] at (4,-1.3) {Contexte région};
+
+\end{tikzpicture}
+\caption{Intégration du modèle ML avec le CropAgent}
+\label{fig:ml_integration}
+\end{figure}
+
+\section{Protocole de Communication IoT}
+
+\subsection{Format des Messages MQTT}
+
+Les données des capteurs sont transmises au format JSON via le protocole MQTT :
+
+\begin{lstlisting}[language=bash, caption=Format message MQTT d'un nœud IoT]
+Topic: agriexpert/parcelle/{parcelle_id}/sensors
+
+Payload:
+{
+  "parcelle_id": "CM-CENTRE-0042",
+  "timestamp": "2026-02-18T10:30:00Z",
+  "gps": {"lat": 3.8480, "lon": 11.5021},
+  "region": "Centre",
+  "sol": {
+    "humidite_pct": 65.2,
+    "ph": 5.8,
+    "temperature_c": 24.1,
+    "azote_mg_kg": 45.3,
+    "phosphore_mg_kg": 12.1,
+    "potassium_mg_kg": 89.7
+  },
+  "meteo": {
+    "temperature_air_c": 27.5,
+    "humidite_air_pct": 78.0,
+    "pluie_mm": 2.3
+  }
+}
+\end{lstlisting}

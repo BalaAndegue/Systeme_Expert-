@@ -1,0 +1,71 @@
+% ============================================================
+%  CHAPITRE 1 — INTRODUCTION
+% ============================================================
+\chapter{Introduction}
+
+\section{Contexte et Motivation}
+
+L'agriculture représente le pilier économique du Cameroun, employant plus de \textbf{70\% de la population active} et contribuant à environ \textbf{22\% du PIB national}. Pourtant, les agriculteurs camerounais font face à des défis majeurs : accès limité aux conseils agronomiques, variabilité climatique croissante, maladies des cultures difficiles à diagnostiquer, et marchés agricoles volatils.
+
+\begin{infobox}[Problématique centrale]
+Comment fournir à chaque agriculteur camerounais, quelle que soit sa région, un accès instantané à des conseils agronomiques personnalisés, précis et adaptés à sa parcelle spécifique, en combinant les technologies IoT, Machine Learning et Intelligence Artificielle ?
+\end{infobox}
+
+Ce projet répond à cette problématique en développant un \textbf{Système Expert Multi-Agents} qui combine :
+\begin{itemize}[leftmargin=2cm]
+  \item[\faLeaf] Des \textbf{capteurs IoT} pour la collecte de données terrain (sol, météo, humidité)
+  \item[\faBrain] Des \textbf{modèles de Machine Learning} pour la prédiction des cultures adaptées
+  \item[\faRobot] Des \textbf{agents IA spécialisés} pour les recommandations contextualisées
+  \item[\faCloud] Une \textbf{API météorologique} (Open-Meteo) pour les données climatiques en temps réel
+\end{itemize}
+
+\section{Objectifs du Projet}
+
+\subsection{Objectif Général}
+Développer une plateforme intelligente de suivi et d'assistance agricole pour les 10 régions du Cameroun, intégrant IoT, Machine Learning et IA conversationnelle.
+
+\subsection{Objectifs Spécifiques}
+\begin{enumerate}
+  \item \textbf{Prédiction des cultures} : Recommander les cultures les plus adaptées à une parcelle donnée selon ses caractéristiques pédoclimatiques
+  \item \textbf{Suivi phytosanitaire} : Diagnostiquer les maladies et ravageurs à partir des symptômes décrits
+  \item \textbf{Optimisation de la fertilisation} : Calculer les besoins NPK précis et recommander les engrais appropriés
+  \item \textbf{Conseil météorologique} : Fournir des prévisions et alertes climatiques agricoles en temps réel
+  \item \textbf{Analyse économique} : Informer sur les prix du marché et la rentabilité des cultures
+  \item \textbf{Gestion des ressources} : Optimiser l'irrigation et la gestion des sols
+\end{enumerate}
+
+\section{Périmètre du Système}
+
+\begin{table}[h!]
+\centering
+\caption{Périmètre fonctionnel du système expert}
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+\rowcolor{AgriBlue!20}
+\textbf{Dimension} & \textbf{Description} \\
+\midrule
+Couverture géographique & 10 régions administratives du Cameroun \\
+\rowcolor{gray!10}
+Cultures couvertes & Cacao, Café, Maïs, Manioc, Plantain, Coton, Sorgho, Riz, Tomate, Arachide, et plus \\
+Langues & Français (principal), extensible au Fulfulde et Pidgin \\
+\rowcolor{gray!10}
+Interfaces & CLI (ligne de commande), API REST, Interface Web \\
+Modèle LLM & Google Gemini 2.0 Flash (via OpenRouter) \\
+\rowcolor{gray!10}
+API météo & Open-Meteo (gratuite, sans clé API) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Structure du Rapport}
+
+Ce rapport est organisé comme suit :
+\begin{description}
+  \item[\textbf{Chapitre 2}] Contexte agricole camerounais et état de l'art
+  \item[\textbf{Chapitre 3}] Architecture globale du système
+  \item[\textbf{Chapitre 4}] Description détaillée des agents spécialisés
+  \item[\textbf{Chapitre 5}] Intégration IoT et modèles de Machine Learning
+  \item[\textbf{Chapitre 6}] Implémentation technique et optimisations
+  \item[\textbf{Chapitre 7}] Résultats, tests et performances
+  \item[\textbf{Chapitre 8}] Conclusion et perspectives
+\end{description}

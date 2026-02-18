@@ -1,0 +1,184 @@
+% ============================================================
+%  CHAPITRE 4 — AGENTS SPÉCIALISÉS
+% ============================================================
+\chapter{Description des Agents Spécialisés}
+
+\section{Vue d'Ensemble des Agents}
+
+Le système comprend \textbf{6 agents spécialisés}, chacun expert dans un domaine précis de l'agronomie camerounaise. Tous héritent de la classe \texttt{BaseAgent} et partagent le même \texttt{LLMService}.
+
+\begin{table}[h!]
+\centering
+\caption{Synthèse des 6 agents spécialisés}
+\begin{tabularx}{\textwidth}{llXl}
+\toprule
+\rowcolor{AgriBlue!20}
+\textbf{Agent} & \textbf{Domaine} & \textbf{Outils principaux} & \textbf{Intents} \\
+\midrule
+WeatherAgent & Météorologie & Open-Meteo API, prévisions 14j & 6 \\
+\rowcolor{gray!10}
+CropAgent & Agronomie & Calendriers, variétés, techniques & 5 \\
+HealthAgent & Phytopathologie & Diagnostic, traitement, prévention & 5 \\
+\rowcolor{gray!10}
+EconomicAgent & Économie & Prix FCFA, rentabilité, marchés & 7 \\
+ResourcesAgent & Pédologie & Sol, irrigation, amendements & 7 \\
+\rowcolor{gray!10}
+FertilizerAgent & Fertilisation & NPK, compost, carences & 6 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{WeatherAgent — Agent Météorologique}
+
+\subsection{Rôle et Fonctionnement}
+Le \texttt{WeatherAgent} est l'interface avec l'API météorologique Open-Meteo. Il fournit des données climatiques \textbf{en temps réel} pour chacune des 10 régions du Cameroun, avec des coordonnées GPS précises.
+
+\begin{lstlisting}[language=Python, caption=Coordonnées GPS des régions dans WeatherAgent]
+REGION_COORDINATES = {
+    "Centre":      {"lat": 3.8480, "lon": 11.5021},
+    "Littoral":    {"lat": 4.0511, "lon":  9.7679},
+    "Ouest":       {"lat": 5.4777, "lon": 10.4176},
+    "Nord-Ouest":  {"lat": 5.9631, "lon": 10.1591},
+    "Adamaoua":    {"lat": 7.3167, "lon": 13.5833},
+    "Nord":        {"lat": 9.3000, "lon": 13.4000},
+    "Extreme-Nord":{"lat":10.5972, "lon": 14.3158},
+    # ...
+}
+\end{lstlisting}
+
+\subsection{Outils Disponibles}
+\begin{itemize}
+  \item \texttt{get\_agricultural\_weather\_summary} : Synthèse météo agricole (température, vent, pluie)
+  \item \texttt{get\_weather\_forecast} : Prévisions à J+3, J+7, J+14
+  \item \texttt{get\_irrigation\_advice} : Conseil d'irrigation basé sur l'évapotranspiration (ET0)
+  \item \texttt{get\_climate\_alerts} : Détection de conditions dangereuses (vent $>$ 40 km/h, pluie $>$ 100mm/3j)
+  \item \texttt{analyze\_rainfall\_patterns} : Analyse tendances pluviométriques sur 14 jours
+  \item \texttt{get\_frost\_risk} : Risque de gel pour les régions montagneuses
+\end{itemize}
+
+\subsection{Calcul du Conseil d'Irrigation}
+Le conseil d'irrigation est basé sur le bilan hydrique :
+\begin{equation}
+\text{Déficit} = ET_0 - P_{3j}
+\end{equation}
+où $ET_0$ est l'évapotranspiration de référence (mm/3j) et $P_{3j}$ les précipitations prévues sur 3 jours.
+
+\begin{itemize}
+  \item Si $P_{3j} < 0.5 \times ET_0$ : \textbf{Irrigation nécessaire}
+  \item Si $0.5 \times ET_0 \leq P_{3j} < ET_0$ : \textbf{Irrigation modérée conseillée}
+  \item Si $P_{3j} \geq ET_0$ : \textbf{Irrigation non nécessaire}
+\end{itemize}
+
+\section{CropAgent — Agent Cultures}
+
+\subsection{Rôle}
+Le \texttt{CropAgent} est l'agronome virtuel du système. Il conseille sur les itinéraires techniques, les calendriers de plantation, les variétés adaptées et les techniques culturales.
+
+\subsection{Intents Reconnus}
+\begin{description}
+  \item[\texttt{CALENDAR}] Questions sur les dates de plantation, calendriers culturaux
+  \item[\texttt{ROTATION}] Conseils sur la rotation des cultures et l'assolement
+  \item[\texttt{VARIETY}] Recommandations de variétés adaptées à la région
+  \item[\texttt{TECHNIQUE}] Itinéraires techniques (espacement, densité, entretien)
+  \item[\texttt{GENERAL}] Questions générales sur les cultures
+\end{description}
+
+\subsection{Exemple de Réponse}
+\begin{successbox}[Exemple : Calendrier Maïs — Région Centre]
+\textbf{Maïs pluvial (Région Centre) :}\\
+\faCalendar\ \textbf{Plantation :} Mars--Avril (grande saison) ou Août--Septembre (petite saison)\\
+\faSeedling\ \textbf{Variétés :} CMS 8704, ATP, TZPB (résistantes à la striure)\\
+\faRuler\ \textbf{Espacement :} 75 cm $\times$ 40 cm (densité : 33 000 plants/ha)\\
+\faCalendarCheck\ \textbf{Récolte :} 90--110 jours après semis
+\end{successbox}
+
+\section{HealthAgent — Agent Santé des Plantes}
+
+\subsection{Base de Connaissances Phytosanitaire}
+L'agent dispose d'une base de connaissances exhaustive sur les maladies et ravageurs des cultures camerounaises :
+
+\begin{table}[h!]
+\centering
+\caption{Principales maladies par culture (base de connaissances HealthAgent)}
+\begin{tabular}{p{2.5cm}p{4cm}p{4cm}}
+\toprule
+\rowcolor{AgriBlue!20}
+\textbf{Culture} & \textbf{Maladies principales} & \textbf{Ravageurs principaux} \\
+\midrule
+Cacao & Pourriture brune (\textit{Phytophthora}), Mirides, Balai de sorcière & \textit{Sahlbergella singularis} \\
+\rowcolor{gray!10}
+Café & Rouille orangée (\textit{Hemileia vastatrix}), Anthracnose & Scolytes (\textit{Hypothenemus hampei}) \\
+Maïs & Charbon (\textit{Ustilago maydis}), Striure virale & Foreurs de tige (\textit{Sesamia calamistis}) \\
+\rowcolor{gray!10}
+Manioc & Mosaïque (CMV), Bactériose & Cochenilles (\textit{Phenacoccus manihoti}) \\
+Plantain & Cercosporiose noire, Fusariose & Charançon (\textit{Cosmopolites sordidus}) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Processus de Diagnostic}
+\begin{enumerate}
+  \item \textbf{Extraction} : Identification de la culture et des symptômes (1 appel LLM combiné)
+  \item \textbf{Diagnostic} : Identification du pathogène probable
+  \item \textbf{Évaluation} : Niveau de gravité (Critique/Élevée/Modérée/Faible)
+  \item \textbf{Traitement} : Produit + dose + méthode d'application
+  \item \textbf{Prévention} : Mesures pour éviter les récidives
+\end{enumerate}
+
+\section{EconomicAgent — Agent Économique}
+
+\subsection{Données de Marché}
+L'agent économique travaille avec des données de marché en \textbf{FCFA} (Franc CFA), couvrant les marchés de Yaoundé, Douala, Bafoussam et Garoua.
+
+\begin{table}[h!]
+\centering
+\caption{Prix de référence des cultures (FCFA/kg, marché Yaoundé)}
+\begin{tabular}{lrrr}
+\toprule
+\rowcolor{AgriBlue!20}
+\textbf{Culture} & \textbf{Prix min} & \textbf{Prix moyen} & \textbf{Prix max} \\
+\midrule
+Cacao (fèves sèches) & 1 500 & 1 800 & 2 200 \\
+\rowcolor{gray!10}
+Café Robusta & 1 200 & 1 500 & 1 800 \\
+Maïs (grain sec) & 150 & 200 & 280 \\
+\rowcolor{gray!10}
+Manioc (frais) & 80 & 120 & 180 \\
+Plantain (régime) & 1 000 & 1 500 & 2 500 \\
+\rowcolor{gray!10}
+Tomate & 300 & 500 & 900 \\
+\bottomrule
+\multicolumn{4}{r}{\small\textit{Source : Données de référence MINADER 2024}}
+\end{tabular}
+\end{table}
+
+\section{FertilizerAgent — Agent Fertilisation}
+
+\subsection{Calcul des Besoins NPK}
+Le \texttt{FertilizerAgent} est le plus technique des agents. Il calcule les besoins précis en azote (N), phosphore (P) et potassium (K) pour chaque culture et superficie.
+
+\begin{equation}
+\text{Besoin total (kg)} = \text{Besoin/ha} \times \text{Superficie (ha)} \times \text{Facteur stade}
+\end{equation}
+
+\subsection{Outils Spécialisés}
+\begin{itemize}
+  \item \texttt{calculate\_npk\_requirements} : Calcul NPK selon culture, superficie et stade phénologique
+  \item \texttt{get\_organic\_fertilizers} : Équivalents en engrais organiques locaux (fumier, compost)
+  \item \texttt{diagnose\_nutrient\_deficiency} : Diagnostic de carence à partir des symptômes visuels
+  \item \texttt{get\_application\_schedule} : Calendrier d'application fractionné
+  \item \texttt{get\_soil\_amendment\_advice} : Conseils d'amendement selon type de sol
+  \item \texttt{calculate\_compost\_recipe} : Recette de compost à partir des ressources locales
+\end{itemize}
+
+\section{ResourcesAgent — Agent Ressources et Sols}
+
+\subsection{Gestion des Sols Camerounais}
+Le \texttt{ResourcesAgent} est spécialisé dans la pédologie camerounaise. Il connaît les caractéristiques des principaux types de sols :
+
+\begin{itemize}
+  \item \textbf{Sols ferralitiques} (Centre, Sud, Est) : pH acide 4,5--5,5, riches en fer et aluminium
+  \item \textbf{Sols volcaniques} (Ouest, Nord-Ouest) : Très fertiles, pH 5--7, bonne rétention d'eau
+  \item \textbf{Sols ferrugineux} (Nord) : pH légèrement acide, carence en phosphore
+  \item \textbf{Vertisols} (Extrême-Nord) : Argileux, pH alcalin 7--8,5, problèmes de salinité
+\end{itemize}

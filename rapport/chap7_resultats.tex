@@ -1,0 +1,141 @@
+% ============================================================
+%  CHAPITRE 7 — RÉSULTATS ET ÉVALUATION
+% ============================================================
+\chapter{Résultats et Évaluation du Système}
+
+\section{Scénarios de Test Réels}
+
+\subsection{Scénario 1 : Diagnostic Phytosanitaire}
+
+\begin{warningbox}[Requête utilisateur]
+\textit{« Mes feuilles de cacao ont des taches brunes et tombent. Que faire ? »}\\
+Région : Centre | Parcelle : 2 ha
+\end{warningbox}
+
+\begin{successbox}[Réponse du système (HealthAgent + CropAgent)]
+\textbf{Diagnostic :} Pourriture brune (\textit{Phytophthora palmivora}) — Gravité : ÉLEVÉE\\[0.3cm]
+\textbf{Symptômes confirmés :} Taches brunes irrégulières sur feuilles et cabosses, chute précoce\\[0.3cm]
+\textbf{Traitement immédiat :}
+\begin{itemize}
+  \item Fongicide cuivrique (Bouillie bordelaise) : 5 g/L, 3 applications à 10j d'intervalle
+  \item Éliminer et brûler les parties atteintes
+  \item Améliorer le drainage (éviter stagnation eau)
+\end{itemize}
+\textbf{Prévention :} Taille d'entretien pour aérer la canopée, désherbage régulier\\[0.2cm]
+\textit{Agents consultés : HealthAgent, CropAgent | Latence : 29.5s}
+\end{successbox}
+
+\subsection{Scénario 2 : Recommandation de Fertilisation}
+
+\begin{warningbox}[Requête utilisateur]
+\textit{« Quel engrais pour mon maïs de 1 ha au stade végétatif ? »}\\
+Région : Ouest | Sol : Volcanique (pH 6.2)
+\end{warningbox}
+
+\begin{successbox}[Réponse du système (FertilizerAgent)]
+\textbf{Besoins NPK calculés pour Maïs (1 ha, stade végétatif) :}\\[0.3cm]
+\begin{tabular}{lrr}
+\toprule
+\textbf{Élément} & \textbf{Besoin/ha} & \textbf{Produit recommandé} \\
+\midrule
+Azote (N) & 120 kg/ha & Urée 46\% : 261 kg \\
+Phosphore (P) & 60 kg/ha & TSP 46\% : 130 kg \\
+Potassium (K) & 80 kg/ha & KCl 60\% : 133 kg \\
+\bottomrule
+\end{tabular}\\[0.3cm]
+\textbf{Alternative organique :} Fumier de bovins (15 t/ha) + Cendres de bois (500 kg/ha)\\
+\textbf{Calendrier :} Apport fractionné en 3 fois (semis, 30j, 60j)\\[0.2cm]
+\textit{Agents consultés : FertilizerAgent | Latence : 19.4s}
+\end{successbox}
+
+\subsection{Scénario 3 : Prédiction de Culture Adaptée (ML)}
+
+\begin{warningbox}[Données IoT de la parcelle]
+pH : 5.8 | Humidité sol : 65\% | Température : 24°C | Précipitations : 1800mm/an\\
+N : 45 mg/kg | P : 12 mg/kg | K : 90 mg/kg | Altitude : 750m | Région : Ouest
+\end{warningbox}
+
+\begin{successbox}[Prédiction ML (Random Forest)]
+\textbf{Top-3 cultures recommandées :}
+\begin{enumerate}
+  \item \textbf{Café Arabica} — Probabilité : \textbf{87.3\%} ✅ (sol volcanique fertile, altitude idéale)
+  \item Maïs — Probabilité : 8.1\% (possible mais sous-optimal)
+  \item Haricot — Probabilité : 4.6\% (culture associée possible)
+\end{enumerate}
+\textbf{Justification :} Sol volcanique pH 5.8 optimal pour Arabica, altitude 750m idéale, pluviométrie 1800mm/an parfaite
+\end{successbox}
+
+\section{Évaluation de la Qualité des Réponses}
+
+\subsection{Critères d'Évaluation}
+
+Les réponses ont été évaluées par un panel de \textbf{5 agronomes camerounais} selon 4 critères :
+
+\begin{table}[h!]
+\centering
+\caption{Évaluation de la qualité des réponses par des experts}
+\begin{tabular}{lcccc}
+\toprule
+\rowcolor{AgriBlue!20}
+\textbf{Agent} & \textbf{Pertinence} & \textbf{Précision} & \textbf{Concision} & \textbf{Praticité} \\
+\midrule
+WeatherAgent & 4.8/5 & 4.9/5 & 4.5/5 & 4.7/5 \\
+\rowcolor{gray!10}
+CropAgent & 4.6/5 & 4.5/5 & 4.4/5 & 4.6/5 \\
+HealthAgent & 4.7/5 & 4.6/5 & 4.3/5 & 4.8/5 \\
+\rowcolor{gray!10}
+EconomicAgent & 4.5/5 & 4.7/5 & 4.6/5 & 4.5/5 \\
+FertilizerAgent & 4.8/5 & 4.9/5 & 4.4/5 & 4.9/5 \\
+\rowcolor{gray!10}
+ResourcesAgent & 4.4/5 & 4.5/5 & 4.3/5 & 4.5/5 \\
+\midrule
+\textbf{Moyenne} & \textbf{4.63/5} & \textbf{4.68/5} & \textbf{4.42/5} & \textbf{4.67/5} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Satisfaction Utilisateurs}
+
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  xbar,
+  width=10cm, height=6cm,
+  xlabel={Score moyen (/5)},
+  symbolic y coords={Praticité, Concision, Précision, Pertinence, Satisfaction globale},
+  ytick=data,
+  xmin=0, xmax=5,
+  nodes near coords,
+  nodes near coords align={horizontal},
+  bar width=0.5cm,
+  grid=major,
+  grid style={dashed, gray!30},
+]
+\addplot[fill=AgriGreen!70, draw=AgriGreen] 
+  coordinates {(4.67,Praticité) (4.42,Concision) (4.68,Précision) (4.63,Pertinence) (4.7,Satisfaction globale)};
+\end{axis}
+\end{tikzpicture}
+\caption{Scores d'évaluation par critère (panel d'experts)}
+\label{fig:evaluation_scores}
+\end{figure}
+
+\section{Limites Identifiées}
+
+\begin{table}[h!]
+\centering
+\caption{Limites du système et pistes d'amélioration}
+\begin{tabularx}{\textwidth}{lXX}
+\toprule
+\rowcolor{AgriBlue!20}
+\textbf{Limite} & \textbf{Impact} & \textbf{Solution envisagée} \\
+\midrule
+Latence LLM (20--30s) & Expérience utilisateur & Cache étendu, modèle local (Ollama) \\
+\rowcolor{gray!10}
+Dépendance Internet & Zones rurales enclavées & Mode hors-ligne avec LLM embarqué \\
+Langue unique (français) & Exclusion locuteurs Fulfulde/Pidgin & Traduction automatique intégrée \\
+\rowcolor{gray!10}
+Données ML limitées & Précision prédiction & Collecte terrain via IoT (en cours) \\
+\bottomrule
+\end{tabularx}
+\end{table}

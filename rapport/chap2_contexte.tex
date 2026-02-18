@@ -1,0 +1,138 @@
+% ============================================================
+%  CHAPITRE 2 — CONTEXTE AGRICOLE ET ÉTAT DE L'ART
+% ============================================================
+\chapter{Contexte Agricole Camerounais et État de l'Art}
+
+\section{Géographie Agricole du Cameroun}
+
+Le Cameroun, surnommé \textit{« l'Afrique en miniature »}, présente une diversité climatique et pédologique exceptionnelle, allant des zones sahéliennes au nord aux forêts équatoriales au sud. Cette diversité se traduit par une grande variété de systèmes de production agricole.
+
+\subsection{Les 10 Régions et leurs Spécificités}
+
+\begin{longtable}{p{2.5cm}p{2.5cm}p{3cm}p{5cm}}
+\caption{Caractéristiques agricoles des 10 régions du Cameroun}\\
+\toprule
+\rowcolor{AgriBlue!20}
+\textbf{Région} & \textbf{Capitale} & \textbf{Type de sol} & \textbf{Cultures principales} \\
+\midrule
+\endfirsthead
+\multicolumn{4}{c}{\textit{(suite du tableau)}} \\
+\toprule
+\rowcolor{AgriBlue!20}
+\textbf{Région} & \textbf{Capitale} & \textbf{Type de sol} & \textbf{Cultures principales} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+Centre & Yaoundé & Ferralitiques, Argileux & Cacao, Café, Manioc, Maïs, Arachide, Plantain \\
+\rowcolor{gray!10}
+Littoral & Douala & Sableux, Volcaniques & Banane, Palmier à huile, Hévéa, Poivre, Cacao \\
+Ouest & Bafoussam & Volcaniques noirs & Café Arabica, Thé, Maïs, Haricot, Pomme de terre \\
+\rowcolor{gray!10}
+Nord-Ouest & Bamenda & Volcaniques & Café Arabica, Thé, Pomme de terre, Riz \\
+Sud-Ouest & Buea & Volcaniques & Cacao, Café, Palmier à huile, Banane, Thé \\
+\rowcolor{gray!10}
+Sud & Ebolowa & Ferralitiques & Cacao, Manioc, Plantain, Palmier à huile \\
+Est & Bertoua & Ferralitiques & Cacao, Café, Manioc, Plantain, Maïs \\
+\rowcolor{gray!10}
+Adamaoua & Ngaoundéré & Ferralitiques rouges & Maïs, Igname, Manioc, Sorgho, Millet \\
+Nord & Garoua & Ferrugineux & Coton, Arachide, Sorgho, Maïs, Oignon \\
+\rowcolor{gray!10}
+Extrême-Nord & Maroua & Sableux, Vertisols & Coton, Sorgho, Millet, Oignon, Riz \\
+\end{longtable}
+
+\subsection{Carte Climatique Schématique}
+
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}[scale=0.9]
+  % Fond
+  \fill[blue!5] (-4,-5) rectangle (4,5);
+  
+  % Zones climatiques (simplifiées)
+  \fill[yellow!30] (-3,2.5) rectangle (3,5);    % Sahélien
+  \fill[orange!25] (-3,0.5) rectangle (3,2.5);  % Soudanien
+  \fill[brown!20] (-3,-0.5) rectangle (3,0.5);  % Adamaoua
+  \fill[green!25] (-3,-3) rectangle (3,-0.5);   % Tropical
+  \fill[green!40] (-3,-5) rectangle (3,-3);     % Équatorial
+
+  % Étiquettes zones
+  \node[font=\small\bfseries, text=orange!70!black] at (0,3.8) {Zone Sahélienne};
+  \node[font=\small, text=orange!60!black] at (0,3.3) {Extrême-Nord (Maroua)};
+  
+  \node[font=\small\bfseries, text=brown!70!black] at (0,1.8) {Zone Soudanienne};
+  \node[font=\small, text=brown!60!black] at (0,1.3) {Nord (Garoua)};
+  
+  \node[font=\small\bfseries, text=brown!60!black] at (0,0) {Adamaoua (Ngaoundéré)};
+  
+  \node[font=\small\bfseries, text=green!60!black] at (0,-1.5) {Zone Tropicale};
+  \node[font=\small, text=green!50!black] at (0,-2) {Centre, Ouest, Nord-Ouest};
+  
+  \node[font=\small\bfseries, text=green!70!black] at (0,-3.8) {Zone Équatoriale};
+  \node[font=\small, text=green!60!black] at (0,-4.3) {Littoral, Sud, Est, Sud-Ouest};
+
+  % Bordure
+  \draw[AgriBlue, line width=1.5pt] (-3,-5) rectangle (3,5);
+  
+  % Légende
+  \node[font=\bfseries\small] at (0,5.5) {Zones Climatiques du Cameroun};
+  
+  % Flèche Nord
+  \draw[->, line width=1pt] (3.5,4) -- (3.5,5);
+  \node[font=\small] at (3.5,5.3) {N};
+\end{tikzpicture}
+\caption{Représentation schématique des zones climatiques du Cameroun}
+\label{fig:zones_climatiques}
+\end{figure}
+
+\section{Défis de l'Agriculture Camerounaise}
+
+\subsection{Défis Techniques}
+\begin{itemize}
+  \item \textbf{Maladies des cultures} : La pourriture brune du cacao (\textit{Phytophthora palmivora}) cause des pertes de 30 à 70\% dans les zones forestières
+  \item \textbf{Dégradation des sols} : L'acidification des sols ferralitiques (pH 4,5--5,5) limite la disponibilité des nutriments
+  \item \textbf{Variabilité climatique} : Décalage des saisons des pluies affectant les calendriers culturaux
+  \item \textbf{Ravageurs} : Mirides du cacao, foreurs de tiges du maïs, charançon du bananier
+\end{itemize}
+
+\subsection{Défis Économiques}
+\begin{itemize}
+  \item Volatilité des prix du cacao et du café sur les marchés internationaux
+  \item Accès limité au crédit agricole pour les petits exploitants
+  \item Coûts de transport élevés dans les zones enclavées (Est, Adamaoua)
+  \item Pertes post-récolte estimées à 30--40\% pour les cultures vivrières
+\end{itemize}
+
+\section{État de l'Art : Systèmes Experts en Agriculture}
+
+\subsection{Approches Existantes}
+
+\begin{table}[h!]
+\centering
+\caption{Comparaison des approches de systèmes experts agricoles}
+\begin{tabularx}{\textwidth}{lXXX}
+\toprule
+\rowcolor{AgriBlue!20}
+\textbf{Approche} & \textbf{Avantages} & \textbf{Limites} & \textbf{Notre apport} \\
+\midrule
+Règles expertes classiques & Explicable, déterministe & Rigide, maintenance coûteuse & Flexibilité LLM \\
+\rowcolor{gray!10}
+ML supervisé seul & Précis sur données connues & Nécessite beaucoup de données & Hybridation LLM+ML \\
+Chatbots génériques & Accessible & Non spécialisé & Agents spécialisés \\
+\rowcolor{gray!10}
+\textbf{Notre système} & \textbf{Spécialisé, adaptatif, multimodal} & Latence LLM & \textbf{--} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Technologies Clés Utilisées}
+
+\begin{description}
+  \item[\textbf{LLM (Large Language Models)}] Les modèles de langage de grande taille, comme Google Gemini 2.0 Flash, permettent une compréhension sémantique fine des requêtes en langage naturel et la génération de réponses contextualisées.
+  
+  \item[\textbf{Architecture Multi-Agents}] Inspirée des systèmes multi-agents (SMA), cette approche décompose la complexité en agents autonomes spécialisés qui collaborent via un orchestrateur central.
+  
+  \item[\textbf{IoT Agricole}] Les capteurs connectés (sol, météo, imagerie) fournissent des données terrain en temps réel, permettant un suivi précis des parcelles.
+  
+  \item[\textbf{API Open-Meteo}] API météorologique gratuite et open-source fournissant des prévisions à 14 jours avec données horaires pour n'importe quelle coordonnée GPS.
+\end{description}

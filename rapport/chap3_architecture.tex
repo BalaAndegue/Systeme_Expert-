@@ -1,0 +1,236 @@
+% ============================================================
+%  CHAPITRE 3 — ARCHITECTURE GLOBALE DU SYSTÈME
+% ============================================================
+\chapter{Architecture Globale du Système}
+
+\section{Vue d'Ensemble}
+
+Le système expert agricole repose sur une architecture en couches (\textit{layered architecture}) combinant une interface utilisateur, un orchestrateur intelligent, des agents spécialisés et des services externes.
+
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}[
+  node distance=0.8cm and 1.2cm,
+  agent/.style={rectangle, rounded corners=5pt, draw=AgriBlue, fill=LightBlue, 
+                minimum width=2.8cm, minimum height=0.9cm, font=\small\bfseries, align=center},
+  orch/.style={rectangle, rounded corners=8pt, draw=AgriGreen, fill=LightGreen,
+               minimum width=5cm, minimum height=1.2cm, font=\bfseries, align=center},
+  service/.style={rectangle, rounded corners=5pt, draw=AgriOrange, fill=LightOrange,
+                  minimum width=3cm, minimum height=0.9cm, font=\small, align=center},
+  iot/.style={ellipse, draw=purple!70, fill=purple!10,
+              minimum width=2.5cm, minimum height=0.8cm, font=\small, align=center},
+  arrow/.style={->, >=Stealth, thick, color=AgriBlue!70},
+  darrow/.style={<->, >=Stealth, thick, color=AgriGreen!70},
+]
+
+% --- Couche IoT (bas) ---
+\node[iot] (sensor1) at (-5,-4.5) {Capteur Sol};
+\node[iot] (sensor2) at (-2.5,-4.5) {Capteur Météo};
+\node[iot] (sensor3) at (0,-4.5) {Caméra};
+\node[iot] (sensor4) at (2.5,-4.5) {GPS Parcelle};
+\node[iot] (sensor5) at (5,-4.5) {Humidité};
+
+% --- Couche données (milieu-bas) ---
+\node[service] (localdata) at (-4,-2.8) {\faDatabase\ Données Locales\\(10 régions)};
+\node[service] (weatherapi) at (0,-2.8) {\faCloud\ Open-Meteo API\\(Météo temps réel)};
+\node[service] (llmservice) at (4,-2.8) {\faBrain\ LLM Service\\(Gemini 2.0 Flash)};
+
+% --- Orchestrateur (centre) ---
+\node[orch] (orch) at (0,-0.8) {\faRobot\ Orchestrateur Central\\(asyncio.gather + Routage LLM)};
+
+% --- Agents (haut) ---
+\node[agent] (weather) at (-5.5,1.5) {\faCloudSun\\WeatherAgent};
+\node[agent] (crop) at (-3,1.5) {\faSeedling\\CropAgent};
+\node[agent] (health) at (-0.5,1.5) {\faHeartbeat\\HealthAgent};
+\node[agent] (economic) at (2,1.5) {\faChartLine\\EconomicAgent};
+\node[agent] (resources) at (4.5,1.5) {\faTint\\ResourcesAgent};
+\node[agent] (fertilizer) at (7,1.5) {\faFlask\\FertilizerAgent};
+
+% --- Interface (haut) ---
+\node[service] (api) at (-3,3.5) {\faServer\ API REST\\(Flask)};
+\node[service] (cli) at (0,3.5) {\faTerminal\ CLI};
+\node[service] (web) at (3,3.5) {\faGlobe\ Interface Web};
+
+% --- Flèches IoT → Données ---
+\foreach \s in {sensor1,sensor2,sensor3,sensor4,sensor5}
+  \draw[arrow, color=purple!60] (\s) -- (weatherapi);
+
+% --- Flèches Données → Orchestrateur ---
+\draw[darrow] (localdata) -- (orch);
+\draw[darrow] (weatherapi) -- (orch);
+\draw[darrow] (llmservice) -- (orch);
+
+% --- Flèches Orchestrateur → Agents ---
+\foreach \a in {weather,crop,health,economic,resources,fertilizer}
+  \draw[darrow] (orch) -- (\a);
+
+% --- Flèches Agents → Interface ---
+\draw[arrow] (weather) -- (api);
+\draw[arrow] (crop) -- (cli);
+\draw[arrow] (health) -- (web);
+
+% --- Labels couches ---
+\node[font=\small\itshape, color=purple!70] at (-7,-4.5) {Couche IoT};
+\node[font=\small\itshape, color=AgriOrange] at (-7,-2.8) {Services};
+\node[font=\small\itshape, color=AgriGreen] at (-7,-0.8) {Orchestration};
+\node[font=\small\itshape, color=AgriBlue] at (-7,1.5) {Agents};
+\node[font=\small\itshape, color=AgriGray] at (-7,3.5) {Interface};
+
+\end{tikzpicture}
+\caption{Architecture en couches du système expert agricole}
+\label{fig:architecture_globale}
+\end{figure}
+
+\section{L'Orchestrateur Central}
+
+L'orchestrateur est le composant central du système. Il reçoit les requêtes utilisateur, les analyse sémantiquement, sélectionne les agents pertinents et agrège leurs réponses.
+
+\subsection{Algorithme de Routage}
+
+\begin{algorithm}[h!]
+\caption{Algorithme de routage et d'orchestration}
+\begin{algorithmic}[1]
+\Require Requête utilisateur $q$, Contexte $ctx$ (région, parcelle)
+\Ensure Réponse synthétisée $R$
+
+\State $agents\_cibles \leftarrow \text{LLM\_Router}(q, \text{liste\_agents})$
+\Comment{1 appel LLM pour le routage}
+\State $agents\_cibles \leftarrow agents\_cibles[0:2]$
+\Comment{Maximum 2 agents}
+
+\State \textbf{// Exécution parallèle}
+\State $tâches \leftarrow [agent.process(q, ctx) \text{ pour chaque } agent \in agents\_cibles]$
+\State $réponses \leftarrow \textbf{await asyncio.gather}(*tâches)$
+\Comment{Parallèle, non-bloquant}
+
+\If{$|réponses| = 1$}
+  \State $R \leftarrow réponses[0]$
+  \Comment{Retour direct, sans appel LLM supplémentaire}
+\Else
+  \State $R \leftarrow \text{LLM\_Synthesize}(q, réponses)$
+  \Comment{Synthèse multi-agents}
+\EndIf
+
+\State \Return $R$
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Traitement Interne de Chaque Agent}
+
+Chaque agent suit un pipeline optimisé en \textbf{2 appels LLM} (au lieu de 3 dans la version initiale) :
+
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}[
+  step/.style={rectangle, rounded corners, draw=AgriBlue, fill=LightBlue,
+               minimum width=3.5cm, minimum height=0.8cm, font=\small, align=center},
+  llmstep/.style={rectangle, rounded corners, draw=AgriGreen, fill=LightGreen,
+                  minimum width=3.5cm, minimum height=0.8cm, font=\small\bfseries, align=center},
+  toolstep/.style={rectangle, rounded corners, draw=AgriOrange, fill=LightOrange,
+                   minimum width=3.5cm, minimum height=0.8cm, font=\small, align=center},
+  arrow/.style={->, >=Stealth, thick},
+  label/.style={font=\footnotesize\itshape, color=AgriGray},
+]
+
+\node[step] (query) at (0,0) {Requête + Contexte};
+\node[llmstep] (combined) at (0,-1.5) {Appel LLM \#1\\Intent + Extraction (JSON)};
+\node[toolstep] (tool) at (0,-3) {Dispatch Outil\\(calcul local / API)};
+\node[llmstep] (final) at (0,-4.5) {Appel LLM \#2\\Génération réponse finale};
+\node[step] (response) at (0,-6) {Réponse structurée};
+
+\draw[arrow] (query) -- (combined);
+\draw[arrow] (combined) -- (tool);
+\draw[arrow] (tool) -- (final);
+\draw[arrow] (final) -- (response);
+
+\node[label] at (4,-1.5) {$\leftarrow$ Optimisation clé:\\2 appels fusionnés en 1};
+\node[label] at (4,-3) {$\leftarrow$ Pas d'appel LLM\\(calcul déterministe)};
+
+\end{tikzpicture}
+\caption{Pipeline de traitement interne d'un agent (version optimisée)}
+\label{fig:pipeline_agent}
+\end{figure}
+
+\section{Le Service LLM avec Cache Non-Bloquant}
+
+\subsection{Principe du Cache}
+
+Pour réduire la latence et les coûts d'API, un cache en mémoire avec TTL (Time-To-Live) de 5 minutes a été implémenté dans le \texttt{LLMService}.
+
+\begin{lstlisting}[language=Python, caption=Cache non-bloquant dans LLMService]
+# Cache en memoire : cle -> (reponse, timestamp)
+_llm_cache: dict = {}
+_CACHE_TTL = 300  # 5 minutes
+
+def _cache_key(prompt: str, system_instruction: str) -> str:
+    raw = f"{system_instruction or ''}||{prompt}"
+    return hashlib.md5(raw.encode()).hexdigest()
+
+async def generate_response(self, prompt: str, ...) -> str:
+    key = _cache_key(prompt, system_instruction)
+    
+    # Lecture cache (non-bloquant)
+    cached = _cache_get(key)
+    if cached is not None:
+        return cached  # Reponse immediate
+    
+    # Appel LLM si cache manque
+    result = await self.client.chat.completions.create(...)
+    
+    # Ecriture cache en arriere-plan (non-bloquant)
+    async def _write_cache():
+        _cache_set(key, result)
+    asyncio.create_task(_write_cache())
+    
+    return result
+\end{lstlisting}
+
+\subsection{Impact du Cache sur la Latence}
+
+\begin{table}[h!]
+\centering
+\caption{Impact du cache sur la latence des réponses}
+\begin{tabular}{lcc}
+\toprule
+\rowcolor{AgriBlue!20}
+\textbf{Scénario} & \textbf{Latence} & \textbf{Gain} \\
+\midrule
+Première requête (cache froid) & 20--30s & -- \\
+\rowcolor{gray!10}
+Requête identique (cache chaud) & $<$ 1ms & \textcolor{AgriGreen}{\textbf{99.9\%}} \\
+Requête similaire (cache froid) & 20--30s & -- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Structure du Projet}
+
+\begin{lstlisting}[language=bash, caption=Structure des fichiers du projet]
+agriculture-cameroun-simple/
+|-- app/
+|   |-- agents/
+|   |   |-- base_agent.py          # Classe de base commune
+|   |   |-- weather/               # Agent meteorologique
+|   |   |   |-- agent.py
+|   |   |   |-- prompt.py          # Prompts + get_combined_prompt()
+|   |   |   `-- tools.py           # Outils API Open-Meteo
+|   |   |-- crop/                  # Agent cultures
+|   |   |-- health/                # Agent sante plantes
+|   |   |-- economic/              # Agent economique
+|   |   |-- resources/             # Agent ressources/sols
+|   |   `-- fertilizer/            # Agent fertilisation NPK
+|   |-- core/
+|   |   `-- orchestrator.py        # Orchestrateur central
+|   |-- services/
+|   |   `-- llm_service.py         # Service LLM + cache
+|   |-- data/
+|   |   `-- local_data.py          # Donnees 10 regions Cameroun
+|   |-- models/
+|   |   `-- region.py              # Modele de donnees Region
+|   `-- api/
+|       `-- routes.py              # API REST Flask
+|-- main.py                        # Point d'entree (CLI + Web)
+|-- config.py                      # Configuration
+|-- pytest.ini                     # Configuration tests
+`-- requirements.txt
+\end{lstlisting}

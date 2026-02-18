@@ -307,3 +307,133 @@ def format_weather_data(data: Dict[str, Any]) -> str:
     wind = current.get('windspeed', 'N/A')
     
     return f"{temp}°C, vent {wind}km/h"
+
+
+def get_crop_monitoring_plan(region_name: str, crop: str = "culture", period_days: int = 7) -> str:
+    """
+    Génère un plan de suivi météo-agronomique structuré sur 7 ou 30 jours.
+    Utilise les données réelles Open-Meteo pour chaque jour.
+    
+    Args:
+        region_name: Nom de la région camerounaise
+        crop: Culture concernée (maïs, cacao, etc.)
+        period_days: Durée du suivi (7 ou 30 jours)
+    """
+    data = fetch_weather_data(region_name, daily=True)
+    fallback = FALLBACK_CLIMATE_DATA.get(region_name, {"temp_avg": 25, "rainfall_annual": 1500, "climate": "Tropical"})
+    
+    # Limiter à 14 jours max (limite API Open-Meteo gratuite)
+    effective_days = min(period_days, 14)
+    
+    if not data or 'daily' not in data:
+        # Fallback climatologique si API indisponible
+        climate = fallback.get('climate', 'Tropical')
+        temp_avg = fallback.get('temp_avg', 25)
+        rainfall = fallback.get('rainfall_annual', 1500)
+        monthly_rain = rainfall / 12
+        
+        plan_lines = [
+            f"📍 **Suivi {crop} — {region_name} ({period_days} jours)**",
+            f"⚠️ *Données temps réel indisponibles. Plan basé sur climatologie historique.*",
+            f"🌡️ Température moyenne: {temp_avg}°C | Climat: {climate}",
+            f"💧 Pluviométrie mensuelle estimée: {monthly_rain:.0f}mm",
+            "",
+            "**Plan de suivi (basé sur normes climatiques) :**",
+        ]
+        
+        weeks = (period_days + 6) // 7
+        for w in range(1, weeks + 1):
+            start_day = (w - 1) * 7 + 1
+            end_day = min(w * 7, period_days)
+            plan_lines.append(f"\n🗓️ **Semaine {w} (J{start_day}–J{end_day}) :**")
+            if w == 1:
+                plan_lines.append(f"  • Préparation sol, semis si humidité suffisante")
+                plan_lines.append(f"  • Irrigation si < 20mm pluie prévue")
+            elif w == 2:
+                plan_lines.append(f"  • Surveillance levée, sarclage précoce")
+                plan_lines.append(f"  • Apport engrais azoté si sol sec")
+            elif w == 3:
+                plan_lines.append(f"  • Buttage, contrôle ravageurs")
+                plan_lines.append(f"  • Traitement préventif si humidité > 80%")
+            else:
+                plan_lines.append(f"  • Suivi croissance, ajustement irrigation")
+                plan_lines.append(f"  • Surveillance maladies fongiques")
+        
+        return "\n".join(plan_lines)
+    
+    # Plan avec données réelles
+    daily = data['daily']
+    dates = daily['time'][:effective_days]
+    precips = daily['precipitation_sum'][:effective_days]
+    tmax = daily['temperature_2m_max'][:effective_days]
+    tmin = daily['temperature_2m_min'][:effective_days]
+    et0_list = daily.get('et0_fao_evapotranspiration', [5.0] * effective_days)[:effective_days]
+    
+    total_rain = sum(precips)
+    avg_tmax = sum(tmax) / len(tmax) if tmax else 25
+    rainy_days = len([p for p in precips if p > 0.5])
+    
+    plan_lines = [
+        f"📍 **Plan de suivi météo-agronomique — {crop} — {region_name}**",
+        f"📅 Période : {dates[0]} → {dates[-1]} ({effective_days} jours de données réelles)",
+        f"",
+        f"**📊 Résumé météo de la période :**",
+        f"  🌡️ Températures : {min(tmin):.0f}–{max(tmax):.0f}°C (moy. max: {avg_tmax:.0f}°C)",
+        f"  💧 Pluie totale : {total_rain:.0f}mm sur {effective_days}j ({rainy_days} jours pluvieux)",
+        f"  🌿 ET0 cumulée : {sum(et0_list):.0f}mm (besoin en eau des plantes)",
+        f"",
+    ]
+    
+    # Bilan hydrique global
+    water_balance = total_rain - sum(et0_list)
+    if water_balance > 20:
+        plan_lines.append(f"  ✅ Bilan hydrique EXCÉDENTAIRE (+{water_balance:.0f}mm) — Risque maladies fongiques")
+    elif water_balance < -20:
+        plan_lines.append(f"  🚰 Bilan hydrique DÉFICITAIRE ({water_balance:.0f}mm) — Irrigation nécessaire")
+    else:
+        plan_lines.append(f"  ⚡ Bilan hydrique équilibré ({water_balance:+.0f}mm) — Conditions favorables")
+    
+    plan_lines.append("")
+    plan_lines.append("**📆 Calendrier d'actions jour par jour :**")
+    plan_lines.append("")
+    
+    # Générer les actions par semaine groupée
+    for i, (date, precip, tx, tn, et0) in enumerate(zip(dates, precips, tmax, tmin, et0_list)):
+        day_num = i + 1
+        deficit = et0 - precip
+        
+        # En-tête de semaine
+        if i % 7 == 0:
+            week_num = i // 7 + 1
+            week_end = min(i + 7, effective_days)
+            week_rain = sum(precips[i:i+7])
+            plan_lines.append(f"🗓️ **Semaine {week_num} (J{day_num}–J{week_end}) — Pluie: {week_rain:.0f}mm**")
+        
+        # Actions du jour
+        actions = []
+        if precip > 20:
+            actions.append(f"⛈️ Forte pluie ({precip:.0f}mm) — Vérifier drainage, éviter traitements")
+        elif precip > 5:
+            actions.append(f"🌧️ Pluie ({precip:.0f}mm) — Conditions favorables")
+        elif deficit > 5:
+            actions.append(f"🚰 Irrigation ({deficit:.0f}mm déficit) — Arroser tôt matin")
+        else:
+            actions.append(f"☀️ Sec ({precip:.1f}mm) — Surveiller humidité sol")
+        
+        if tx > 35:
+            actions.append(f"🌡️ Chaleur ({tx:.0f}°C) — Ombrage si possible")
+        
+        plan_lines.append(f"  J{day_num} ({date}): {tx:.0f}/{tn:.0f}°C | " + " | ".join(actions))
+    
+    # Si période > 14j, ajouter projection climatologique pour le reste
+    if period_days > effective_days:
+        remaining = period_days - effective_days
+        plan_lines.append("")
+        plan_lines.append(f"**📈 Projection J{effective_days+1}–J{period_days} (estimation climatologique) :**")
+        monthly_rain = fallback.get('rainfall_annual', 1500) / 12
+        plan_lines.append(f"  💧 Pluie estimée: {monthly_rain * remaining / 30:.0f}mm")
+        plan_lines.append(f"  🌡️ Température estimée: {fallback.get('temp_avg', 25)}°C")
+        plan_lines.append(f"  🎯 Actions: Maintenir suivi hebdomadaire, ajuster selon conditions réelles")
+    
+    return "\n".join(plan_lines)
+
