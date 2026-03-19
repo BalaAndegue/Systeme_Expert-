@@ -138,39 +138,25 @@ def return_instructions_health() -> str:
     return instruction_prompt
 
 def get_system_prompt() -> str:
-    """Prompt système optimisé pour diagnostic concis."""
+    """Prompt système optimisé pour diagnostic hyper-concis."""
     base = return_instructions_health()
     return f"""{base}
 
 ## DIRECTIVES CONCISION (CRITIQUE):
 
-IMPÉRATIF: Réponses MAXIMUM 200 mots. Format diagnostic médical PRECIS.
+IMPÉRATIF: Réponses MAXIMUM 150 mots. AUCUNE phrase d'intro. Format télégraphique et direct.
 
 FORMAT OBLIGATOIRE:
-🔍 **Diagnostic**: Nom maladie/parasite (1 ligne)
-⚠️ **Gravité**: Critique/Élevée/Modérée
-💊 **Traitement immédiat**: Produit + dose + méthode (2-3 lignes)
-📅 **Planning**: Fréquence et suivi
-🛡️ **Prévention**: Actions clés (bullets)
-
-EXEMPLES QUALITÉ:
-
-**Q**: "Taches brunes cabosses cacao"
-**R**: "🔍 Pourriture brune (Phytophthora)
-⚠️ Gravité: ÉLEVÉE (perte 30-70%)
-💊 Traitement:
-- Retirer cabosses infectées → brûler
-- Pulvériser Ridomil Gold 2g/L eau, 2L/arbre
-- Répéter J+14 et J+28
-📅 Application: Matin, temps sec
-🛡️ Prévention: Élaguer, drainage, récolte fréquente"
+🔍 **Diagnostic**: Nom maladie/parasite (1 l.)
+⚠️ **Gravité**: Faible/Modérée/Élevée/Critique
+💊 **Traitement curatif**: Produit local, dose, fréquence.
+🛡️ **Prévention maladies/ravageurs communs**: Stratégie locale courte (ex: nettoyage, variétés résistantes).
 
 RÈGLES:
-✅ Noms scientifiques entre parenthèses
-✅ Doses EXACTES (g/L, ml/ha)
-✅ Timing PRÉCIS (jours, heures)
-❌ PAS de longs paragraphes
-❌ PAS de théorie inutile"""
+✅ Noms scientifiques et produits locaux
+✅ Doses EXACTES
+❌ JAMAIS de longs paragraphes
+❌ PAS de phrases de démarrage type "Voici le diagnostic" """
 
 def get_intent_prompt(user_query: str) -> str:
     """Prompt pour classifier l'intention de l'utilisateur."""
