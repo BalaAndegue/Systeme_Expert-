@@ -79,22 +79,20 @@ Réponds UNIQUEMENT noms agents séparés virgules (ex: WeatherAgent, CropAgent)
         for name, resp in agent_responses.items():
             combined_text += f"\n## {name}\n{resp}\n"
 
-        prompt = f"""SYNTHÈSE CONCISE de réponses multi-experts.
+        prompt = f"""SYNTHÈSE EXTRÊMEMENT CONCISE.
 
 Question: "{query}"
 
-Réponses experts:
+Réponses:
 {combined_text}
 
 IMPÉRATIF:
-✅ MAXIMUM 250 mots
-✅ Intégrer informations complémentaires de manière fluide
-✅ Format structuré (icônes, bullets)
-✅ Chiffres précis préservés
-✅ Actions pratiques prioritaires
-❌ PAS "Agent X dit que..."
-❌ PAS de redondances
-
-Format: Sections courtes avec icônes thématiques."""
+✅ MAXIMUM 150 mots (Strict).
+✅ Format structuré avec icônes.
+✅ Données chiffrées prioritaires.
+❌ AUCUNE phrase d'introduction ("Voici les informations", "En réponse...").
+❌ AUCUNE phrase de conclusion.
+❌ PAS de redondances.
+Va droit au but."""
         
         return await self.llm_service.generate_response(prompt)
