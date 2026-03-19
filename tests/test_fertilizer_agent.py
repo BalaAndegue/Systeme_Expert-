@@ -1,9 +1,12 @@
 import pytest
 import asyncio
+from unittest.mock import AsyncMock, patch
 from app.agents.fertilizer.agent import FertilizerAgent
 
 @pytest.mark.asyncio
-async def test_fertilizer_agent_process():
+@patch("app.services.llm_service.LLMService.generate_response", new_callable=AsyncMock)
+async def test_fertilizer_agent_process(mock_generate_response):
+    mock_generate_response.return_value = "Voici une recommandation d'engrais NPK pour le sol."
     agent = FertilizerAgent()
     query = "Quel engrais pour le maïs ?"
     context = {"region": "Centre"}
