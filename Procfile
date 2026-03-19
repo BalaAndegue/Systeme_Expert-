@@ -1,1 +1,1 @@
-web: gunicorn -b 0.0.0.0:$PORT -k uvicorn.workers.UvicornWorker "app:create_app()"
+web: gunicorn -b 0.0.0.0:$PORT --threads 4 "app:create_app()"
