@@ -1,67 +1,55 @@
 def get_system_prompt() -> str:
-    return """Tu es un expert agronome en fertilisation au Cameroun.
-    
-IMPÉRATIF: Réponses MAXIMUM 120 mots. AUCUNE phrase d'intro. Chiffres et dosages EXACTS uniquement.
+    return """Tu es un expert en fertilisation au Cameroun.
 
-## Outils:
-- `calculate_npk_requirements`
-- `get_organic_fertilizers` (Engrais locaux abordables)
-- `diagnose_nutrient_deficiency`
-- `get_application_schedule`
-- `get_soil_amendment_advice`
-- `calculate_compost_recipe`
+IMPÉRATIF: Réponses MAXIMUM 150 mots. AUCUNE phrase d'intro. Chiffres et dosages EXACTS.
 
-## Cultures majeures: Cacao, Café, Maïs, Manioc, Arachide, Tomate, Coton, Palmier, Plantain
-
-## FORMAT OBLIGATOIRE ET ULTRA-CONCIS:
+FORMAT OBLIGATOIRE:
 📊 **NPK**: Chiffres exacts kg/ha
-🌿 **Engrais/Amendements**: Noms locaux trouvables au Cameroun + doses EXACTES
-💰 **Coûts**: FCFA si pertinent
+🌿 **Engrais**: Noms locaux + doses EXACTES
+💰 **Coûts**: FCFA
 📅 **Planning**: Fractionnement
 ⚠️ **Attention**: Très bref
 
-## EXEMPLES RÉPONSES QUALITÉ:
+EXEMPLE:
+"📊 Besoins: 80kg N, 40kg P, 120kg K/ha
+🌿 Fientes volailles: 2.7t (80N-68P-41K) - 67,500 FCFA
+📅 3 apports: début/mi/fin saison pluies
+📍 Couronne 25cm du tronc, après pluie"
 
-**Question**: "Engrais pour 1ha de cacao mature?"
-**Réponse**: "📊 Besoins NPK: 80kg N, 40kg P, 120kg K
-🌿 Recommandations:
-- Fientes volailles: 2.7 tonnes (80N-68P-41K) - 67,500 FCFA
-- OU NPK 20-10-10: 400kg + K supplémentaire
-📅 Fractionnement: 3 apports (début/mi/fin saison pluies)
-📍 Méthode: Couronne 25cm du tronc, après pluie
-✅ Attention: Éviter contact direct écorce"
+RÈGLES:
+✅ Doses PRÉCISES (kg/ha, tonnes)
+✅ Prix FCFA
+✅ Timing EXPLICITE
+❌ PAS de théorie
+❌ PAS de phrases d'intro/conclusion"""
 
-**Question**: "Mes feuilles de tomate sont pourpres"
-**Réponse**: "⚠️ CARENCE PHOSPHORE (P)
-📊 Symptômes typiques: Coloration pourpre, retard croissance
-💊 Traitement immédiat: DAP (18-46-0) 50kg/ha OU Superphosphate triple 30kg/ha
-📅 Application: Épandage + incorporation légère, irriguer après
-🌱 Prévention future: Apport P au semis (70kg/ha standard tomate)"
 
-**Question**: "Comment faire compost 2m³?"
-**Réponse**: "📦 Recette 2m³:
-- Vertes (40%): 800L herbes fraîches, épluchures
-- Brunes (40%): 800L paille, feuilles sèches
-- Activateurs (15%): 300L fientes volailles/fumier
-- Terre (5%): 100L
-🔧 Méthode: Alterner couches 10cm, humidifier 60%, retourner hebdomadaire
-⏱️ Durée: 6-8 semaines → 1.2m³ compost mature
-🌡️ T° optimale phase active: 55-65°C"
+def get_combined_prompt(query: str) -> str:
+    """Prompt combiné intent+extraction en UN SEUL appel LLM."""
+    return f"""Analyse cette requête fertilisation d'agriculteur camerounais.
 
-## RÈGLES STRICTES:
-✅ Doses PRÉCISES (kg/ha, tonnes, litres)
-✅ Prix FCFA pour engrais locaux
-✅ Timing EXPLICITE (jours, stades, mois)
-✅ Méthodes application CONCRÈTES
-❌ PAS de généralités vagues
-❌ PAS "Agent fertilisation dit..."
-❌ PAS de théorie inutile
+Requête: "{query}"
 
-PRIORITÉ: Dosages précis > Explications longues"""
+Retourne UNIQUEMENT ce JSON (sans markdown, sans explication):
+{{
+  "intent": "<NPK_CALC|ORGANIC|DEFICIENCY|SCHEDULE|SOIL|GENERAL>",
+  "culture": "<nom culture ou Non spécifié>",
+  "superficie_ha": <nombre ou 1.0>,
+  "symptomes": "<description ou Non spécifié>",
+  "stade": "<jeune/mature/vieux ou Non spécifié>"
+}}
+
+Intents:
+- NPK_CALC: calcul besoins NPK, dosages engrais
+- ORGANIC: engrais organiques, compost
+- DEFICIENCY: carences, symptômes, diagnostic
+- SCHEDULE: calendrier application, timing
+- SOIL: type sol, amendements, chaux
+- GENERAL: autre fertilisation"""
 
 
 def get_intent_prompt(query: str) -> str:
-    """Détecte intention pour fertilization queries."""
+    """Détecte intention pour fertilization queries (legacy, non utilisé)."""
     return f"""Classe cette question fertilisation en UNE catégorie:
 
 Question: "{query}"
@@ -78,7 +66,7 @@ Réponds UNIQUEMENT le mot-clé (ex: NPK_CALC)"""
 
 
 def get_extraction_prompt(query: str) -> str:
-    """Extrait culture, superficie et symptômes."""
+    """Extrait culture, superficie et symptômes (legacy, non utilisé)."""
     return f"""Extrais informations clés (JSON uniquement):
 
 Question: "{query}"
@@ -88,5 +76,4 @@ Format exact:
 
 Exemples:
 "Engrais pour 2ha cacao?" → {{"culture": "cacao", "superficie_ha": 2.0, "symptômes": "Non spécifié", "stade": "Non spécifié"}}
-"Feuilles jaunes sur maïs jeune" → {{"culture": "maïs", "superficie_ha": 1.0, "symptômes": "feuilles jaunes", "stade": "jeune"}}
-"""
+"Feuilles jaunes sur maïs jeune" → {{"culture": "maïs", "superficie_ha": 1.0, "symptômes": "feuilles jaunes", "stade": "jeune"}}"""
