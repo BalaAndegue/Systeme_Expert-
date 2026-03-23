@@ -55,7 +55,7 @@ class LLMService:
         else:
             print(f"WARNING: API Key for {self.provider} not found. AI features disabled.")
 
-    async def generate_response(self, prompt: str, system_instruction: str = None) -> str:
+    async def generate_response(self, prompt: str, system_instruction: str = None, temperature: float = None) -> str:
         if not self.client:
             return "Service IA non configuré."
 
@@ -72,10 +72,14 @@ class LLMService:
         messages.append({"role": "user", "content": prompt})
 
         try:
-            response = await self.client.chat.completions.create(
-                model=Config.LLM_MODEL,
-                messages=messages
-            )
+            kwargs = {
+                "model": Config.LLM_MODEL,
+                "messages": messages,
+                "max_tokens": 2048
+            }
+            if temperature is not None:
+                kwargs["temperature"] = temperature
+            response = await self.client.chat.completions.create(**kwargs)
             result = response.choices[0].message.content
 
             # --- Cache non-bloquant : écriture en arrière-plan ---
@@ -87,14 +91,18 @@ class LLMService:
         except Exception as e:
             return f"Erreur LLM ({self.provider}): {str(e)}"
 
-    def generate_sync(self, prompt: str) -> str:
+    def generate_sync(self, prompt: str, temperature: float = None) -> str:
         if not self.sync_client:
              return "Service IA non configuré."
         try:
-            response = self.sync_client.chat.completions.create(
-                model=Config.LLM_MODEL,
-                messages=[{"role": "user", "content": prompt}]
-            )
+            kwargs = {
+                "model": Config.LLM_MODEL,
+                "messages": [{"role": "user", "content": prompt}],
+                "max_tokens": 2048
+            }
+            if temperature is not None:
+                kwargs["temperature"] = temperature
+            response = self.sync_client.chat.completions.create(**kwargs)
             return response.choices[0].message.content
         except Exception as e:
              return f"Error: {e}"
